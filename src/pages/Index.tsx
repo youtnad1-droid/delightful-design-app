@@ -1,6 +1,7 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Film, Tv, Clapperboard, Settings, Clock, CloudSun, User } from "lucide-react";
 import { useState } from "react";
+import glassCardImg from "@/assets/glass-card-single.jpg";
 
 const categories = [
   {
@@ -14,7 +15,6 @@ const categories = [
     count: "+5000 Channels",
     icon: Tv,
     lastUpdate: "Last Update: 2 day ago",
-    featured: true,
   },
   {
     title: "Series",
@@ -29,50 +29,87 @@ const CategoryCard = ({
   count,
   icon: Icon,
   lastUpdate,
-  featured,
   index,
+  isSelected,
+  onClick,
 }: {
   title: string;
   count: string;
   icon: React.ElementType;
   lastUpdate: string;
-  featured?: boolean;
   index: number;
+  isSelected: boolean;
+  onClick: () => void;
 }) => (
   <motion.div
+    layout
     initial={{ opacity: 0, y: 30 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.2 + index * 0.15, duration: 0.6 }}
-    whileHover={{ scale: 1.05, y: -4 }}
-    className={`glass-card rounded-2xl p-6 cursor-pointer transition-all duration-300 ${
-      featured ? "w-72 h-52 z-10" : "w-60 h-44"
-    } flex flex-col justify-between relative overflow-hidden group`}
+    animate={{
+      opacity: 1,
+      y: 0,
+      scale: isSelected ? 1.15 : 0.9,
+      zIndex: isSelected ? 10 : 1,
+    }}
+    transition={{ type: "spring", stiffness: 300, damping: 25, delay: index * 0.1 }}
+    whileHover={{ scale: isSelected ? 1.18 : 0.95 }}
+    whileTap={{ scale: isSelected ? 1.12 : 0.88 }}
+    onClick={onClick}
+    className="relative cursor-pointer select-none"
+    style={{ width: isSelected ? 280 : 220, height: isSelected ? 190 : 160 }}
   >
-    {featured && (
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent pointer-events-none" />
-    )}
-    <div className="flex items-start justify-between relative z-10">
-      <div>
-        <h3 className="text-foreground text-lg font-medium">{title}</h3>
-        <p className="text-muted-foreground text-sm mt-1">{count}</p>
-      </div>
-      <Icon
-        className={`w-12 h-12 ${
-          featured
-            ? "text-primary gold-glow animate-glow-pulse"
-            : "text-muted-foreground/50"
-        } group-hover:text-primary transition-colors`}
-        strokeWidth={1.2}
+    {/* Glass card image background */}
+    <div className="absolute inset-0 rounded-2xl overflow-hidden">
+      <img
+        src={glassCardImg}
+        alt=""
+        className="w-full h-full object-cover opacity-60"
       />
+      <div className="absolute inset-0 glass-card rounded-2xl" />
     </div>
-    <div className="flex items-center gap-1.5 text-muted-foreground text-xs relative z-10">
-      <Clock className="w-3 h-3" />
-      <span>{lastUpdate}</span>
+
+    {/* Gold glow on selected */}
+    <AnimatePresence>
+      {isSelected && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="absolute -inset-1 rounded-2xl pointer-events-none"
+          style={{
+            boxShadow: "0 0 30px hsla(40, 80%, 55%, 0.25), inset 0 0 30px hsla(40, 80%, 55%, 0.05)",
+            border: "1px solid hsla(40, 80%, 55%, 0.2)",
+            borderRadius: "1rem",
+          }}
+        />
+      )}
+    </AnimatePresence>
+
+    {/* Content */}
+    <div className="relative z-10 h-full flex flex-col justify-between p-5">
+      <div className="flex items-start justify-between">
+        <div>
+          <h3 className="text-foreground text-lg font-medium">{title}</h3>
+          <p className="text-muted-foreground text-sm mt-1">{count}</p>
+        </div>
+        <Icon
+          className={`transition-all duration-500 ${
+            isSelected
+              ? "w-14 h-14 text-primary gold-glow animate-glow-pulse"
+              : "w-10 h-10 text-muted-foreground/40"
+          }`}
+          strokeWidth={1.2}
+        />
+      </div>
+      <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+        <Clock className="w-3 h-3" />
+        <span>{lastUpdate}</span>
+      </div>
     </div>
   </motion.div>
 );
 
 const Index = () => {
+  const [selectedIndex, setSelectedIndex] = useState(1);
   const [currentTime] = useState(() => {
     const now = new Date();
     return now.toLocaleTimeString("en-US", {
@@ -95,9 +132,9 @@ const Index = () => {
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Header */}
         <header className="flex items-center justify-between px-8 pt-6">
-          <div className="w-16 h-16 rounded-xl glass overflow-hidden">
+          <div className="w-14 h-14 rounded-xl glass overflow-hidden">
             <div className="w-full h-full bg-muted/30 flex items-center justify-center">
-              <Tv className="w-6 h-6 text-muted-foreground" />
+              <Tv className="w-5 h-5 text-muted-foreground" />
             </div>
           </div>
 
@@ -105,26 +142,32 @@ const Index = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="font-display text-4xl tracking-[0.3em] gold-text"
+            className="font-display text-3xl md:text-4xl tracking-[0.3em] gold-text"
           >
             NADIBOX
           </motion.h1>
 
           <div className="flex items-center gap-3">
-            <button className="w-12 h-12 rounded-full glass flex items-center justify-center hover:border-primary/40 transition-colors">
+            <button className="w-11 h-11 rounded-full glass flex items-center justify-center hover:border-primary/40 transition-colors">
               <Settings className="w-5 h-5 text-muted-foreground" />
             </button>
-            <button className="w-12 h-12 rounded-full border-2 border-primary/50 overflow-hidden glass flex items-center justify-center">
+            <button className="w-11 h-11 rounded-full border-2 border-primary/50 overflow-hidden glass flex items-center justify-center">
               <User className="w-5 h-5 text-muted-foreground" />
             </button>
           </div>
         </header>
 
         {/* Main Cards */}
-        <main className="flex-1 flex items-center justify-center px-8">
-          <div className="flex items-center gap-6">
+        <main className="flex-1 flex items-center justify-center px-4">
+          <div className="flex items-center justify-center gap-4 md:gap-6">
             {categories.map((cat, i) => (
-              <CategoryCard key={cat.title} {...cat} index={i} />
+              <CategoryCard
+                key={cat.title}
+                {...cat}
+                index={i}
+                isSelected={selectedIndex === i}
+                onClick={() => setSelectedIndex(i)}
+              />
             ))}
           </div>
         </main>
@@ -147,11 +190,11 @@ const Index = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
-            className="flex items-center gap-6"
+            className="flex items-center gap-4 md:gap-6"
           >
             <div className="flex items-center gap-2">
               <CloudSun className="w-5 h-5 text-primary" />
-              <span className="text-foreground text-xl font-light">{currentTime}</span>
+              <span className="text-foreground text-lg font-light">{currentTime}</span>
             </div>
             <div className="h-6 w-px bg-border" />
             <div className="flex items-center gap-2">
