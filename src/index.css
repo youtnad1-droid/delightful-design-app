@@ -36,7 +36,7 @@
 
     --radius: 1rem;
 
-    --glass-bg: hsla(195, 30%, 20%, 0.25);
+    --glass-bg: hsla(195, 30%, 20%, 0.12);
     --glass-border: hsla(195, 40%, 50%, 0.2);
     --glass-shadow: 0 8px 32px hsla(0, 0%, 0%, 0.3);
     --gold-glow: 0 0 20px hsla(40, 80%, 55%, 0.4);
