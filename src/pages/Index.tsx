@@ -1,7 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Film, Tv, Clapperboard, Settings, Clock, CloudSun, User } from "lucide-react";
 import { useState } from "react";
-import glassCardImg from "@/assets/glass-card-single.jpg";
 
 const categories = [
   {
@@ -57,15 +56,7 @@ const CategoryCard = ({
     className="relative cursor-pointer select-none"
     style={{ width: isSelected ? 280 : 220, height: isSelected ? 190 : 160 }}
   >
-    {/* Glass card image background */}
-    <div className="absolute inset-0 rounded-2xl overflow-hidden">
-      <img
-        src={glassCardImg}
-        alt=""
-        className="w-full h-full object-cover opacity-60"
-      />
-      <div className="absolute inset-0 glass-card rounded-2xl" />
-    </div>
+    <div className="absolute inset-0 rounded-2xl overflow-hidden glass-card" />
 
     {/* Gold glow on selected */}
     <AnimatePresence>
