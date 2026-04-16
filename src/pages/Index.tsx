@@ -1,7 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Film, Tv, Clapperboard, Settings, Clock, CloudSun, User } from "lucide-react";
 import { useState } from "react";
-import glassCardImg from "@/assets/glass-card-single.jpg";
 
 const categories = [
   {
