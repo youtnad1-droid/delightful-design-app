@@ -8,6 +8,7 @@ import LiveTV from "./pages/LiveTV.tsx";
 import Movies from "./pages/Movies.tsx";
 import SeriesPage from "./pages/SeriesPage.tsx";
 import Account from "./pages/Account.tsx";
+import Login from "./pages/Login.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/movies" element={<Movies />} />
           <Route path="/series" element={<SeriesPage />} />
           <Route path="/account" element={<Account />} />
+          <Route path="/login" element={<Login />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
