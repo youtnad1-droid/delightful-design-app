@@ -1,9 +1,15 @@
+export type ProfileKind = "xtream" | "m3u";
+
 export interface XtreamProfile {
   id: string;
   name: string;
+  kind?: ProfileKind; // defaults to 'xtream' for backwards compat
+  // Xtream Codes
   serverUrl: string;
   username: string;
   password: string;
+  // M3U
+  m3uUrl?: string;
 }
 
 export interface Channel {

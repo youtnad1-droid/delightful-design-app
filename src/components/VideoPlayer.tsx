@@ -16,9 +16,10 @@ const VideoPlayer = ({ src, poster, autoPlay = true, className = "" }: Props) =>
     if (!video || !src) return;
 
     let hls: Hls | null = null;
-    const isHls = src.includes(".m3u8");
+    const isHls = /\.m3u8(\?|$)/i.test(src);
+    const canNativeHls = video.canPlayType("application/vnd.apple.mpegurl") !== "";
 
-    if (isHls && Hls.isSupported()) {
+    if (isHls && Hls.isSupported() && !canNativeHls) {
       hls = new Hls({ enableWorker: true, lowLatencyMode: true });
       hls.loadSource(src);
       hls.attachMedia(video);
@@ -29,9 +30,7 @@ const VideoPlayer = ({ src, poster, autoPlay = true, className = "" }: Props) =>
       video.src = src;
     }
 
-    if (autoPlay) {
-      video.play().catch(() => {});
-    }
+    if (autoPlay) video.play().catch(() => {});
 
     return () => {
       if (hls) hls.destroy();

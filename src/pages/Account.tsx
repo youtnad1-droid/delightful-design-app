@@ -5,6 +5,7 @@ import PageLayout from "@/components/PageLayout";
 import AddServerDialog from "@/components/AddServerDialog";
 import { useProfiles } from "@/hooks/useProfiles";
 import { useReloadPlaylist } from "@/hooks/useXtreamData";
+import { useConnectProfile } from "@/hooks/useConnectProfile";
 import { xtreamApi } from "@/lib/xtream";
 import { toast } from "sonner";
 import type { XtreamProfile } from "@/types/xtream";
@@ -12,6 +13,7 @@ import type { XtreamProfile } from "@/types/xtream";
 const Account = () => {
   const { profiles, activeProfileId, setActiveProfileId, addProfile, updateProfile, removeProfile } = useProfiles();
   const reload = useReloadPlaylist();
+  const connect = useConnectProfile();
 
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
@@ -166,10 +168,9 @@ const Account = () => {
       <AddServerDialog
         open={showAdd}
         onClose={() => setShowAdd(false)}
-        onSubmit={(data) => {
-          const p = addProfile(data);
-          setShowAdd(false);
-          toast.success(`Added ${p.name}`);
+        onSubmit={async (data) => {
+          const created = await connect(data);
+          if (created) setShowAdd(false);
         }}
       />
     </PageLayout>
