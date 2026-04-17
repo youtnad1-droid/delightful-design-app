@@ -23,10 +23,10 @@ const PageLayout = ({ title, children }: { title: string; children: React.ReactN
             {title}
           </motion.h1>
           <div className="flex items-center gap-2">
-            <button className="w-9 h-9 rounded-full glass flex items-center justify-center">
+            <button onClick={() => navigate("/account")} className="w-9 h-9 rounded-full glass flex items-center justify-center hover:border-primary/40">
               <Settings className="w-4 h-4 text-muted-foreground" />
             </button>
-            <button className="w-9 h-9 rounded-full border-2 border-primary/50 glass flex items-center justify-center">
+            <button onClick={() => navigate("/account")} className="w-9 h-9 rounded-full border-2 border-primary/50 glass flex items-center justify-center">
               <User className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>

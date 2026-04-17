@@ -84,10 +84,10 @@ const Index = () => {
               className="w-11 h-11 rounded-full glass flex items-center justify-center hover:border-primary/40 transition-colors">
               <Plus className="w-5 h-5 text-muted-foreground" />
             </button>
-            <button className="w-11 h-11 rounded-full glass flex items-center justify-center hover:border-primary/40 transition-colors">
+            <button onClick={() => navigate("/account")} className="w-11 h-11 rounded-full glass flex items-center justify-center hover:border-primary/40 transition-colors">
               <Settings className="w-5 h-5 text-muted-foreground" />
             </button>
-            <button className="w-11 h-11 rounded-full border-2 border-primary/50 overflow-hidden glass flex items-center justify-center">
+            <button onClick={() => navigate("/account")} className="w-11 h-11 rounded-full border-2 border-primary/50 overflow-hidden glass flex items-center justify-center">
               <User className="w-5 h-5 text-muted-foreground" />
             </button>
           </div>
