@@ -10,26 +10,35 @@ export interface Channel {
   id: string;
   name: string;
   category: string;
+  categoryId: string;
   streamUrl: string;
   logoUrl?: string;
-  isFavorite: boolean;
+  epgChannelId?: string;
 }
 
 export interface Movie {
   id: string;
   name: string;
   category: string;
+  categoryId: string;
   streamUrl: string;
   posterUrl?: string;
   rating?: string;
   year?: string;
+  containerExtension?: string;
 }
 
 export interface Series {
   id: string;
   name: string;
   category: string;
+  categoryId: string;
   posterUrl?: string;
   rating?: string;
-  seasons?: number;
+  plot?: string;
+}
+
+export interface XtreamCategory {
+  category_id: string;
+  category_name: string;
 }
