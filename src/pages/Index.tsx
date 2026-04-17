@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AddServerDialog from "@/components/AddServerDialog";
 import { useProfiles } from "@/hooks/useProfiles";
+import { useConnectProfile } from "@/hooks/useConnectProfile";
 
 const categories = [
   { title: "Live TV", count: "+5000 Channels", icon: Tv, route: "/live-tv" },
@@ -60,6 +61,7 @@ const Index = () => {
   const [showAddServer, setShowAddServer] = useState(false);
   const navigate = useNavigate();
   const { profiles, activeProfile, addProfile } = useProfiles();
+  const connect = useConnectProfile();
 
   const [currentTime] = useState(() =>
     new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })
@@ -146,7 +148,10 @@ const Index = () => {
       <AddServerDialog
         open={showAddServer}
         onClose={() => setShowAddServer(false)}
-        onSubmit={(data) => { addProfile(data); setShowAddServer(false); }}
+        onSubmit={async (data) => {
+          const created = await connect(data);
+          if (created) setShowAddServer(false);
+        }}
       />
     </div>
   );
