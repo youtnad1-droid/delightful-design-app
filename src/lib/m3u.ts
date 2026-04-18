@@ -43,9 +43,8 @@ const isVideoExt = (url: string) => /\.(mp4|mkv|avi|mov|webm|ts)(\?|$)/i.test(ur
 
 export const m3uApi = {
   async fetchPlaylist(url: string) {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Failed to fetch M3U: ${res.status}`);
-    const text = await res.text();
+    const { proxyFetch } = await import("@/lib/proxy");
+    const text = await proxyFetch<string>(url, "text");
     return parseM3U(text);
   },
 
