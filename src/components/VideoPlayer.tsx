@@ -157,6 +157,7 @@ const VideoPlayer = ({ src, poster, autoPlay = true, className = "", isLive }: P
 
     return () => {
       cancelled = true;
+      if (stallTimer !== null) clearInterval(stallTimer);
       if (hls) hls.destroy();
       if (mpegtsPlayer) {
         try {
