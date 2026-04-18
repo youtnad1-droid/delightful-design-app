@@ -64,7 +64,13 @@ const VideoPlayer = ({ src, poster, autoPlay = true, className = "", isLive }: P
       hls.attachMedia(video);
 
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        if (live) video.muted = true;
+        if (live) {
+          video.muted = true;
+          // Force a lower quality level for stability on live streams (if multiple levels exist)
+          if (hls && hls.levels && hls.levels.length > 1) {
+            hls.currentLevel = Math.min(1, hls.levels.length - 1);
+          }
+        }
         // For VOD, autoplay immediately. For live, wait until ~10s buffered.
         if (!live && autoPlay) video.play().catch(() => {});
       });
