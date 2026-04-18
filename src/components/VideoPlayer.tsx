@@ -75,7 +75,10 @@ const VideoPlayer = ({ src, poster, autoPlay = true, className = "", isLive }: P
       mpegtsPlayer.attachMediaElement(video);
       mpegtsPlayer.load();
       if (live) video.muted = true;
-      if (autoPlay) mpegtsPlayer.play()?.catch(() => {});
+      if (autoPlay) {
+        const p = mpegtsPlayer.play() as unknown as Promise<void> | void;
+        if (p && typeof (p as Promise<void>).catch === "function") (p as Promise<void>).catch(() => {});
+      }
       mpegtsPlayer.on(mpegts.Events.ERROR, (type, detail) => {
         console.error("mpegts.js error:", type, detail);
       });
