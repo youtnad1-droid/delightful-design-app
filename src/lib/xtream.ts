@@ -1,4 +1,5 @@
 import type { XtreamProfile, Channel, Movie, Series, XtreamCategory } from "@/types/xtream";
+import { proxyFetch } from "@/lib/proxy";
 
 const buildUrl = (p: XtreamProfile, action?: string, extra: Record<string, string> = {}) => {
   const base = p.serverUrl.replace(/\/$/, "");
@@ -12,9 +13,7 @@ const buildUrl = (p: XtreamProfile, action?: string, extra: Record<string, strin
 };
 
 const fetchJson = async (url: string) => {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Request failed: ${res.status}`);
-  return res.json();
+  return proxyFetch<any>(url, "json");
 };
 
 export const xtreamApi = {
