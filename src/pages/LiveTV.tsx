@@ -118,7 +118,7 @@ const LiveTV = () => {
         <div className="flex-1 flex flex-col gap-3">
           <div className="flex-1 glass-card rounded-2xl overflow-hidden flex items-center justify-center min-h-[240px] relative">
             {current ? (
-              <VideoPlayer src={current.streamUrl} poster={current.logoUrl} />
+              <VideoPlayer src={current.streamUrl} poster={current.logoUrl} isLive />
             ) : (
               <div className="text-center">
                 <Play className="w-12 h-12 text-primary/50 mx-auto mb-2" />
