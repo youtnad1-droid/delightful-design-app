@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import Hls from "hls.js";
+import mpegts from "mpegts.js";
 import { proxiedStreamUrl } from "@/lib/streamProxy";
 
 interface Props {
@@ -7,7 +8,7 @@ interface Props {
   poster?: string;
   autoPlay?: boolean;
   className?: string;
-  /** Hint that this is a live stream (Live TV) — enables HLS.js with live-tuned config. */
+  /** Hint that this is a live stream (Live TV) — enables HLS.js / mpegts.js with live-tuned config. */
   isLive?: boolean;
 }
 
@@ -23,18 +24,18 @@ const VideoPlayer = ({ src, poster, autoPlay = true, className = "", isLive }: P
 
     const proxiedSrc = proxiedStreamUrl(src);
     const live = isLive ?? isLiveUrl(src);
-    const isHls = /\.m3u8(\?|$)/i.test(src) || live;
     const canNativeHls = video.canPlayType("application/vnd.apple.mpegurl") !== "";
 
     let hls: Hls | null = null;
+    let mpegtsPlayer: mpegts.Player | null = null;
+    let cancelled = false;
 
     // Reset video element
     video.pause();
     video.removeAttribute("src");
     video.load();
 
-    if (isHls && Hls.isSupported()) {
-      // Prefer HLS.js (works on Chrome/Edge/Firefox). Live-tuned config for Live TV.
+    const playWithHls = () => {
       hls = new Hls(
         live
           ? { enableWorker: true, lowLatencyMode: true, liveSyncDuration: 3, maxBufferLength: 20, backBufferLength: 30 }
@@ -43,20 +44,53 @@ const VideoPlayer = ({ src, poster, autoPlay = true, className = "", isLive }: P
       hls.loadSource(proxiedSrc);
       hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        if (live) video.muted = true; // help autoplay for live
+        if (live) video.muted = true;
         if (autoPlay) video.play().catch(() => {});
       });
       hls.on(Hls.Events.ERROR, (_e, data) => {
-        if (data.fatal) {
-          console.error("HLS fatal error:", data);
-          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls?.startLoad();
-          else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hls?.recoverMediaError();
+        if (!data.fatal) return;
+        console.error("HLS error:", data);
+        // If the "playlist" is actually MPEG-TS (no EXTM3U), fall back to mpegts.js
+        if (data.details === "manifestParsingError" && live) {
+          hls?.destroy();
+          hls = null;
+          playWithMpegts();
+        } else if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+          hls?.startLoad();
+        } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+          hls?.recoverMediaError();
         }
       });
-    } else if (isHls && canNativeHls) {
-      // Safari native HLS
-      video.src = proxiedSrc;
+    };
+
+    const playWithMpegts = () => {
+      if (!mpegts.isSupported()) {
+        console.error("mpegts.js not supported in this browser");
+        return;
+      }
+      mpegtsPlayer = mpegts.createPlayer(
+        { type: "mpegts", isLive: live, url: proxiedSrc },
+        { enableWorker: true, liveBufferLatencyChasing: live, lazyLoad: false }
+      );
+      mpegtsPlayer.attachMediaElement(video);
+      mpegtsPlayer.load();
       if (live) video.muted = true;
+      if (autoPlay) {
+        const p = mpegtsPlayer.play() as unknown as Promise<void> | void;
+        if (p && typeof (p as Promise<void>).catch === "function") (p as Promise<void>).catch(() => {});
+      }
+      mpegtsPlayer.on(mpegts.Events.ERROR, (type, detail) => {
+        console.error("mpegts.js error:", type, detail);
+      });
+    };
+
+    // Decide initial engine
+    if (live && Hls.isSupported()) {
+      // Try HLS first; auto-fallback to mpegts on parse error
+      playWithHls();
+    } else if (live && canNativeHls) {
+      video.src = proxiedSrc;
+      video.muted = true;
       if (autoPlay) video.play().catch(() => {});
     } else {
       // VOD / direct file (mp4, mkv, etc.)
@@ -65,7 +99,16 @@ const VideoPlayer = ({ src, poster, autoPlay = true, className = "", isLive }: P
     }
 
     return () => {
+      cancelled = true;
       if (hls) hls.destroy();
+      if (mpegtsPlayer) {
+        try {
+          mpegtsPlayer.pause();
+          mpegtsPlayer.unload();
+          mpegtsPlayer.detachMediaElement();
+          mpegtsPlayer.destroy();
+        } catch {}
+      }
       video.removeAttribute("src");
       video.load();
     };
